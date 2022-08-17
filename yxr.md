@@ -345,6 +345,36 @@ int main()
     return 0;
 }
 ```
+
+### 1.5 manacher算法
+#### 目的：求最长回文串、所有回文串
+```cpp
+const int N=1000010;
+int d[N];//每一位为中间的最长回文串的半径
+//vector<pair<int,int>> v;//不同的回文串左右端点，可能有重，但总数不超过n个
+void manacher(string &a) {
+    string t="$|";//扩展串
+    for(auto p:a) {
+        t+=p;t+='|';
+    }
+    int l=1,r=1;
+    for(int i=1;i<t.size();i++) {
+        int j=l+r-i;
+        if(r>i) d[i]=min(d[j],j-l+1);
+        while (t[i-d[i]]==t[i+d[i]]) {
+            //可能产生新的回文子串
+            //if(t[i-d[i]]!='|') v.push_back({i-d[i],i+d[i]});
+            d[i]++;
+        }
+        if(i+d[i]-1>r) {
+            l=i-d[i]+1;
+            r=i+d[i]-1;
+        }
+    }
+    a=t;//返回扩展之后的a，长度是原先的两倍+2
+}
+```
+
 <div STYLE="page-break-after: always;"></div>
 
 ## 2.数据结构
@@ -808,6 +838,33 @@ for (int i = 1; i <= n; i ++ )
 ULL get(int l, int r)
 {
     return h[r] - h[l - 1] * p[r - l + 1];
+}
+```
+
+#### 2.7.4 字符串双哈希
+```cpp
+解决单hash精度不够的问题
+int hash1[N],hash2[N];
+int p1[N],p2[N];
+const int base1=131,base2=13331;
+const int mod1=998244353,mod2=1e9+7;
+int get_hash1(int l,int r) {
+    return (hash1[r]-hash1[l-1]*p1[r-l+1]%mod1+mod1)%mod1;
+}
+int get_hash2(int l,int r) {
+    return (hash2[r]-hash2[l-1]*p2[r-l+1]%mod2+mod2)%mod2;
+}
+//用一个pair<int,int>表示{l,r}的哈希值
+//pair{get_hash1(l,r),get_hash2(l,r)}
+//初始化：
+{
+    p1[0]=p2[0]=1;
+    for(int j=1;j<=n;j++) {
+        p1[j]=p1[j-1]*base1%mod1;
+        p2[j]=p2[j-1]*base2%mod2;
+        hash1[j]=(hash1[j-1]*base1%mod1+s[j])%mod1;
+        hash2[j]=(hash2[j-1]*base2%mod2+s[j])%mod2;
+    }
 }
 ```
 <div STYLE="page-break-after: always;"></div>
